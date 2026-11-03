@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: emenu-app
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # Set these manually in Render dashboard:
+      - key: DATABASE_URL
+        sync: false          # Supabase connection string
+
+      - key: APP_URL
+        sync: false          # https://emenu-app.onrender.com  (your Render URL)
+
+      - key: MENU_BASE_URL
+        sync: false          # https://emenu-app.onrender.com/menu
+
+      - key: JWT_ACCESS_SECRET
+        sync: false          # 64-char random string
+
+      - key: JWT_REFRESH_SECRET
+        sync: false          # 64-char random string (different from above)
+
+      - key: GOOGLE_CLIENT_ID
+        sync: false          # Google OAuth Web Client ID
+
+      - key: SMTP_HOST
+        value: smtp.zoho.in
+
+      - key: SMTP_PORT
+        value: "465"
+
+      - key: SMTP_USER
+        sync: false          # your Zoho email
+
+      - key: SMTP_PASS
+        sync: false          # Zoho App Password

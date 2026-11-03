@@ -1,0 +1,1 @@
+ALTER TABLE "menus" ADD COLUMN "uploadedMenuImages" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

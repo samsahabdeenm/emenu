@@ -1,0 +1,3 @@
+ALTER TABLE "menus"
+ADD COLUMN "menuMode" TEXT NOT NULL DEFAULT 'EDITOR',
+ADD COLUMN "uploadedMenuImage" TEXT;

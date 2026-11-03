@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>E-Menu — Template Picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --teal:#0ea5a4;--teal-d:#0b8786;--teal-bg:rgba(14,165,164,0.08);
+  --blue:#0f3b68;
+}
+html,body{height:100%;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+body{display:flex;height:100vh;overflow:hidden;background:#f9fafb}
+
+/* ── MAIN PREVIEW AREA ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 24px;background:#fff;border-bottom:1px solid #f0f0f0;flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.back-btn{
+  width:34px;height:34px;border-radius:10px;border:none;background:#f3f4f6;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:#6b7280;font-size:16px;transition:all .15s;
+}
+.back-btn:hover{background:#e5e7eb;color:#111}
+.topbar-title{font-weight:800;font-size:15px;color:#111;line-height:1.2}
+.topbar-sub{font-size:11px;color:#9ca3af}
+.steps{display:flex;align-items:center;gap:6px;font-size:11px;color:#9ca3af}
+.step-dot{
+  width:20px;height:20px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:10px;
+}
+.step-done{background:var(--teal);color:#fff}
+.step-active{background:var(--teal);color:#fff}
+.step-pending{background:#e5e7eb;color:#9ca3af}
+.step-line{width:24px;height:1px;background:#e5e7eb}
+.step-active-label{color:var(--teal);font-weight:700}
+
+.preview-area{
+  flex:1;overflow-y:auto;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:20px;padding:32px 16px;
+}
+.template-badge{display:flex;align-items:center;gap:10px}
+.template-emoji{font-size:28px}
+.template-name{font-weight:900;font-size:20px;color:#111}
+.template-meta{font-size:12px;color:#9ca3af;margin-top:2px}
+
+/* ── PHONE MOCKUP ── */
+.phone-wrap{position:relative;width:272px;transition:all .3s ease}
+.phone-glow{
+  position:absolute;inset:0;border-radius:40px;
+  filter:blur(30px);opacity:0.25;transform:scale(0.9);z-index:-1;
+}
+.phone-shell{
+  border-radius:40px;padding:12px;box-shadow:0 30px 60px rgba(0,0,0,0.25);
+  border:1px solid #3a3a3c;position:relative;
+}
+.phone-notch{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:72px;height:22px;border-radius:0 0 14px 14px;z-index:10;
+}
+.phone-screen{border-radius:32px;overflow:hidden;min-height:540px}
+.phone-header{padding:44px 14px 14px;text-align:center}
+.phone-avatar{
+  width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin:0 auto 8px;
+}
+.phone-rest-name{color:#fff;font-weight:800;font-size:13px;margin-bottom:2px}
+.phone-rest-type{color:rgba(255,255,255,0.6);font-size:10px;margin-bottom:6px}
+.phone-meta{display:flex;justify-content:center;gap:10px;font-size:9px;color:rgba(255,255,255,0.4)}
+.cat-tabs{
+  display:flex;gap:5px;padding:10px 10px 7px;overflow-x:auto;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+}
+.cat-tab{
+  padding:4px 10px;border-radius:20px;font-size:9px;font-weight:700;
+  white-space:nowrap;flex-shrink:0;cursor:default;
+}
+.cat-tab.active{color:#fff}
+.cat-tab.inactive{border:1px solid #e5e7eb}
+.items-wrap{padding:10px 10px 6px}
+.section-label{
+  font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  color:#9ca3af;margin-bottom:6px;
+}
+.menu-item{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:8px 9px;border-radius:9px;margin-bottom:5px;
+  border:1px solid rgba(0,0,0,0.05);
+}
+.item-left{display:flex;gap:7px;flex:1}
+.veg-dot{
+  width:11px;height:11px;border-radius:2px;flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;border:2px solid;
+}
+.veg-inner{width:4.5px;height:4.5px;border-radius:50%}
+.item-name{font-size:10px;font-weight:700;margin-bottom:1px}
+.item-tag{font-size:8.5px;font-weight:700;color:#f59e0b}
+.item-price{font-weight:800;font-size:11px;flex-shrink:0}
+.phone-footer{text-align:center;padding:6px 0 10px;font-size:8.5px;color:rgba(0,0,0,0.15)}
+
+/* ── COLOR SWATCHES ── */
+.swatches{display:flex;align-items:center;gap:10px}
+.swatch-label{font-size:11px;color:#9ca3af;font-weight:500}
+.swatch-dots{display:flex;gap:6px}
+.swatch{
+  width:18px;height:18px;border-radius:50%;border:2px solid #fff;
+  box-shadow:0 0 0 2px #e5e7eb;
+}
+.theme-badge{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;
+}
+
+/* ── BOTTOM CTA ── */
+.bottom-cta{
+  flex-shrink:0;padding:14px 24px;background:#fff;
+  border-top:1px solid #f0f0f0;
+}
+.cta-inner{display:flex;align-items:center;gap:16px;max-width:400px;margin:0 auto}
+.cta-text{flex:1;font-size:12px;color:#6b7280}
+.cta-text strong{color:#111;font-weight:700}
+.use-btn{
+  display:flex;align-items:center;gap:6px;padding:11px 22px;border-radius:12px;
+  background:var(--teal);color:#fff;font-weight:800;font-size:13px;
+  border:none;cursor:pointer;transition:all .2s;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(14,165,164,0.3);
+}
+.use-btn:hover{background:var(--teal-d);transform:translateY(-1px);box-shadow:0 4px 16px rgba(14,165,164,0.4)}
+.use-btn:active{transform:scale(0.97)}
+
+/* ── RIGHT PANEL ── */
+.panel{
+  width:288px;background:#fff;border-left:1px solid #f0f0f0;
+  display:flex;flex-direction:column;flex-shrink:0;
+}
+.panel-head{padding:16px 16px 12px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.panel-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.panel-title{font-weight:800;font-size:13px;color:#111}
+.panel-sub{font-size:11px;color:#9ca3af}
+.panel-count{
+  font-size:10px;font-weight:700;color:var(--teal);
+  background:var(--teal-bg);padding:3px 8px;border-radius:8px;
+  display:flex;align-items:center;gap:4px;
+}
+.search-wrap{position:relative}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:12px}
+.search-input{
+  width:100%;padding:8px 32px 8px 30px;border-radius:10px;
+  background:#f9fafb;border:1px solid #f0f0f0;font-size:12px;
+  color:#374151;outline:none;font-family:inherit;transition:all .2s;
+}
+.search-input::placeholder{color:#d1d5db}
+.search-input:focus{border-color:rgba(14,165,164,0.4);box-shadow:0 0 0 3px rgba(14,165,164,0.1)}
+.clear-btn{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:#d1d5db;cursor:pointer;font-size:14px;
+  display:none;
+}
+.panel-list{flex:1;overflow-y:auto;divide-y:1px solid #fafafa}
+.panel-footer{
+  padding:10px 16px;border-top:1px solid #f0f0f0;flex-shrink:0;
+  text-align:center;font-size:10px;color:#d1d5db;line-height:1.5;
+}
+
+/* ── TEMPLATE CARD (list item) ── */
+.tpl-card{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  cursor:pointer;transition:all .15s;border-left:3px solid transparent;
+  border-bottom:1px solid #fafafa;
+}
+.tpl-card:hover{background:#f9fafb}
+.tpl-card.selected{
+  background:var(--teal-bg);border-left-color:var(--teal);
+}
+.tpl-thumb{
+  position:relative;width:44px;height:58px;border-radius:10px;
+  overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.12);
+}
+.tpl-thumb-head{height:45%}
+.tpl-thumb-body{height:55%;padding:4px 4px 4px}
+.tpl-thumb-line{border-radius:2px;margin-bottom:2px}
+.tpl-thumb-dot{
+  position:absolute;bottom:5px;right:5px;
+  width:8px;height:8px;border-radius:50%;
+}
+.tpl-check{
+  position:absolute;inset:0;background:rgba(14,165,164,0.25);
+  display:none;align-items:center;justify-content:center;
+}
+.tpl-card.selected .tpl-check{display:flex}
+.check-circle{
+  width:20px;height:20px;border-radius:50%;background:var(--teal);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:11px;font-weight:900;box-shadow:0 2px 6px rgba(14,165,164,0.5);
+}
+.tpl-info{flex:1;min-width:0}
+.tpl-name{font-size:13px;font-weight:700;color:#111;margin-bottom:1px;transition:color .15s}
+.tpl-card.selected .tpl-name{color:var(--teal)}
+.tpl-type{font-size:10.5px;color:#9ca3af;margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tpl-style{
+  display:inline-block;font-size:9.5px;font-weight:700;
+  padding:2px 6px;border-radius:5px;
+}
+.tpl-style.light{background:#f3f4f6;color:#6b7280}
+.tpl-style.dark{background:#1f2937;color:#9ca3af}
+.tpl-arrow{color:var(--teal);font-size:14px;flex-shrink:0;display:none}
+.tpl-card.selected .tpl-arrow{display:block}
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:48px 16px;color:#d1d5db;
+}
+.empty-state p{font-size:13px;font-weight:600;margin-top:8px}
+.empty-state button{
+  font-size:11px;color:var(--teal);margin-top:4px;
+  background:none;border:none;cursor:pointer;font-family:inherit;
+}
+.empty-state button:hover{text-decoration:underline}
+
+/* scrollbar */
+.panel-list::-webkit-scrollbar,.preview-area::-webkit-scrollbar{width:4px}
+.panel-list::-webkit-scrollbar-track,.preview-area::-webkit-scrollbar-track{background:transparent}
+.panel-list::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:4px}
+
+/* mobile */
+@media(max-width:600px){
+  .steps{display:none}
+  .panel{width:260px}
+}
+</style>
+</head>
+<body>
+
+<!-- MAIN PREVIEW -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="back-btn">←</button>
+      <div>
+        <div class="topbar-title">Choose a Template</div>
+        <div class="topbar-sub">Pick a design — you can change it anytime</div>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step-dot step-done">✓</div>
+      <span>Details</span>
+      <div class="step-line"></div>
+      <div class="step-dot step-active">2</div>
+      <span class="step-active-label">Template</span>
+      <div class="step-line"></div>
+      <div class="step-dot step-pending">3</div>
+      <span>Menu</span>
+    </div>
+  </div>
+
+  <div class="preview-area" id="previewArea">
+    <div class="template-badge">
+      <span class="template-emoji" id="selEmoji">🍽️</span>
+      <div>
+        <div class="template-name" id="selName">Classic</div>
+        <div class="template-meta" id="selMeta">Restaurant · Light theme · Clean & professional</div>
+      </div>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone-glow" id="phoneGlow"></div>
+      <div class="phone-shell" id="phoneShell">
+        <div class="phone-notch" id="phoneNotch"></div>
+        <div class="phone-screen" id="phoneScreen">
+          <div class="phone-header" id="phoneHeader">
+            <div class="phone-avatar" id="phoneAvatar">🍽️</div>
+            <div class="phone-rest-name">Spice Garden</div>
+            <div class="phone-rest-type" id="phoneType">Restaurant</div>
+            <div class="phone-meta">
+              <span>📍 Chennai, TN</span>
+              <span>⭐ 4.8</span>
+            </div>
+          </div>
+          <div class="cat-tabs" id="catTabs"></div>
+          <div class="items-wrap" id="itemsWrap"></div>
+          <div class="phone-footer" id="phoneFooter">⬡ Powered by ZenVentora</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="swatches">
+      <span class="swatch-label">Colors</span>
+      <div class="swatch-dots">
+        <div class="swatch" id="sw1" title="Primary"></div>
+        <div class="swatch" id="sw2" title="Accent"></div>
+        <div class="swatch" id="sw3" title="Background"></div>
+      </div>
+      <span class="theme-badge" id="themeBadge">Light</span>
+    </div>
+  </div>
+
+  <div class="bottom-cta">
+    <div class="cta-inner">
+      <div class="cta-text">
+        <strong id="ctaName">Classic</strong> selected · You can change this later
+      </div>
+      <button class="use-btn" onclick="handleUseTemplate()">
+        ⚡ Use Template →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="panel">
+  <div class="panel-head">
+    <div class="panel-title-row">
+      <div>
+        <div class="panel-title">Templates</div>
+        <div class="panel-sub" id="panelSub">15 available</div>
+      </div>
+      <div class="panel-count" id="panelCount">✓ 1 of 15</div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        class="search-input" type="text" id="searchInput"
+        placeholder="Search templates…"
+        oninput="handleSearch()"
+      />
+      <button class="clear-btn" id="clearBtn" onclick="clearSearch()">✕</button>
+    </div>
+  </div>
+  <div class="panel-list" id="panelList"></div>
+  <div class="panel-footer">More templates on Standard &amp; Premium plans</div>
+</div>
+
+<script>
+const TEMPLATES = [
+  { id:'1', name:'Classic', type:'Restaurant', category:'Restaurant', style:'Light', primary:'#0f3b68', accent:'#0ea5a4', bg:'#ffffff', text:'#111827', cardBg:'#f9fafb', border:'#e5e7eb', tagline:'Clean & professional', emoji:'🍽️' },
+  { id:'2', name:'Modern Dark', type:'Cafe', category:'Cafe', style:'Dark', primary:'#0ea5a4', accent:'#e94560', bg:'#1a1a2e', text:'#f9fafb', cardBg:'#16213e', border:'rgba(255,255,255,0.08)', tagline:'Sleek & contemporary', emoji:'☕' },
+  { id:'3', name:'Fresh', type:'Juice Shop', category:'Juice Shop', style:'Light', primary:'#059669', accent:'#10b981', bg:'#f0fdf4', text:'#111827', cardBg:'#dcfce7', border:'#bbf7d0', tagline:'Fresh & vibrant', emoji:'🥤' },
+  { id:'4', name:'Minimal', type:'Bakery', category:'Bakery', style:'Light', primary:'#7c3aed', accent:'#8b5cf6', bg:'#fafafa', text:'#111827', cardBg:'#f3f4f6', border:'#e5e7eb', tagline:'Clean & minimal', emoji:'🍰' },
+  { id:'5', name:'Bold', type:'Fast Food', category:'Fast Food', style:'Dark', primary:'#e11d48', accent:'#f59e0b', bg:'#1c1917', text:'#f9fafb', cardBg:'#292524', border:'rgba(255,255,255,0.07)', tagline:'Bold & energetic', emoji:'🍔' },
+  { id:'6', name:'Warm Spice', type:'Indian Restaurant', category:'Restaurant', style:'Light', primary:'#b45309', accent:'#d97706', bg:'#fffbeb', text:'#111827', cardBg:'#fef3c7', border:'#fde68a', tagline:'Warm & inviting', emoji:'🍛' },
+  { id:'7', name:'Royal', type:'Fine Dining', category:'Fine Dining', style:'Dark', primary:'#7c3aed', accent:'#c084fc', bg:'#0f172a', text:'#f9fafb', cardBg:'#1e1b4b', border:'rgba(255,255,255,0.07)', tagline:'Elegant & luxurious', emoji:'👑' },
+  { id:'8', name:'Ocean', type:'Seafood', category:'Seafood', style:'Light', primary:'#0369a1', accent:'#06b6d4', bg:'#f0f9ff', text:'#111827', cardBg:'#e0f2fe', border:'#bae6fd', tagline:'Fresh & coastal', emoji:'🦞' },
+  { id:'9', name:'Garden', type:'Vegan & Salads', category:'Vegan', style:'Light', primary:'#166534', accent:'#84cc16', bg:'#f7fee7', text:'#111827', cardBg:'#dcfce7', border:'#bbf7d0', tagline:'Natural & wholesome', emoji:'🥗' },
+  { id:'10', name:'Ember', type:'BBQ & Grill', category:'Grill', style:'Dark', primary:'#ea580c', accent:'#f97316', bg:'#1c1917', text:'#f9fafb', cardBg:'#292524', border:'rgba(255,255,255,0.07)', tagline:'Hot & smoky', emoji:'🔥' },
+  { id:'11', name:'Midnight', type:'Bar & Lounge', category:'Bar', style:'Dark', primary:'#6366f1', accent:'#818cf8', bg:'#030712', text:'#f9fafb', cardBg:'#111827', border:'rgba(255,255,255,0.07)', tagline:'Moody & sophisticated', emoji:'🍸' },
+  { id:'12', name:'Blossom', type:'Desserts & Sweets', category:'Desserts', style:'Light', primary:'#be185d', accent:'#f472b6', bg:'#fdf2f8', text:'#111827', cardBg:'#fce7f3', border:'#fbcfe8', tagline:'Sweet & delightful', emoji:'🌸' },
+  { id:'13', name:'Earthy', type:'Street Food', category:'Street Food', style:'Light', primary:'#92400e', accent:'#d97706', bg:'#fef9c3', text:'#111827', cardBg:'#fef3c7', border:'#fde68a', tagline:'Rustic & homely', emoji:'🌮' },
+  { id:'14', name:'Steel', type:'Modern Bistro', category:'Bistro', style:'Light', primary:'#1e293b', accent:'#64748b', bg:'#f8fafc', text:'#111827', cardBg:'#f1f5f9', border:'#e2e8f0', tagline:'Sharp & corporate', emoji:'🍱' },
+  { id:'15', name:'Coral', type:'Mediterranean', category:'Mediterranean', style:'Light', primary:'#c2410c', accent:'#fb923c', bg:'#fff7ed', text:'#111827', cardBg:'#ffedd5', border:'#fed7aa', tagline:'Warm Mediterranean vibes', emoji:'🫒' },
+]
+
+const MOCK_ITEMS = [
+  { name:'Chicken Biryani', price:'₹200', veg:false, tag:'Bestseller' },
+  { name:'Paneer Tikka', price:'₹160', veg:true, tag:null },
+  { name:'Dal Makhani', price:'₹130', veg:true, tag:'Special' },
+]
+const MOCK_CATS = ['Starters','Main Course','Breads','Desserts']
+
+let selectedId = '1'
+let searchQuery = ''
+
+function getFiltered() {
+  const q = searchQuery.toLowerCase()
+  return TEMPLATES.filter(t =>
+    t.name.toLowerCase().includes(q) ||
+    t.type.toLowerCase().includes(q) ||
+    t.category.toLowerCase().includes(q)
+  )
+}
+
+function updatePhonePreview(t) {
+  const isDark = t.style === 'Dark'
+  const shellColor = isDark ? '#1a1a1a' : '#2c2c2e'
+
+  // Glow
+  document.getElementById('phoneGlow').style.background = t.primary
+
+  // Shell
+  const shell = document.getElementById('phoneShell')
+  shell.style.background = shellColor
+  shell.style.borderColor = isDark ? '#2d2d2d' : '#3a3a3c'
+
+  // Notch
+  document.getElementById('phoneNotch').style.background = shellColor
+
+  // Screen bg
+  document.getElementById('phoneScreen').style.background = t.bg
+
+  // Header
+  const hdr = document.getElementById('phoneHeader')
+  hdr.style.background = t.primary
+
+  // Avatar + emoji
+  document.getElementById('phoneAvatar').textContent = t.emoji
+
+  // Type label
+  document.getElementById('phoneType').textContent = t.type
+
+  // Footer
+  const ft = document.getElementById('phoneFooter')
+  ft.style.color = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)'
+
+  // Category tabs
+  const tabsEl = document.getElementById('catTabs')
+  tabsEl.style.background = t.bg
+  tabsEl.style.borderBottom = `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#f0f0f0'}`
+  tabsEl.innerHTML = MOCK_CATS.map((cat, i) => `
+    <span class="cat-tab ${i===0?'active':'inactive'}" style="
+      background:${i===0 ? t.accent : 'transparent'};
+      color:${i===0 ? '#fff' : (isDark ? 'rgba(255,255,255,0.4)' : '#9ca3af')};
+      border-color:${i===0 ? 'transparent' : t.border};
+    ">${cat}</span>
+  `).join('')
+
+  // Menu items
+  const itemsEl = document.getElementById('itemsWrap')
+  const labelColor = isDark ? 'rgba(255,255,255,0.35)' : '#9ca3af'
+  itemsEl.innerHTML = `
+    <div class="section-label" style="color:${labelColor}">Starters</div>
+    ${MOCK_ITEMS.map(item => `
+      <div class="menu-item" style="background:${t.cardBg};border-color:${t.border}">
+        <div class="item-left">
+          <div class="veg-dot" style="border-color:${item.veg?'#22c55e':'#ef4444'}">
+            <div class="veg-inner" style="background:${item.veg?'#22c55e':'#ef4444'}"></div>
+          </div>
+          <div>
+            <div class="item-name" style="color:${t.text}">${item.name}</div>
+            ${item.tag ? `<div class="item-tag">★ ${item.tag}</div>` : ''}
+          </div>
+        </div>
+        <div class="item-price" style="color:${t.accent}">${item.price}</div>
+      </div>
+    `).join('')}
+  `
+
+  // Swatches
+  document.getElementById('sw1').style.background = t.primary
+  document.getElementById('sw2').style.background = t.accent
+  document.getElementById('sw3').style.background = t.bg
+  const badge = document.getElementById('themeBadge')
+  badge.textContent = t.style
+  badge.style.background = isDark ? '#1f2937' : '#f3f4f6'
+  badge.style.color = isDark ? '#9ca3af' : '#6b7280'
+}
+
+function updateBadge(t) {
+  document.getElementById('selEmoji').textContent = t.emoji
+  document.getElementById('selName').textContent = t.name
+  document.getElementById('selMeta').textContent = `${t.type} · ${t.style} theme · ${t.tagline}`
+  document.getElementById('ctaName').textContent = t.name
+}
+
+function renderPanel() {
+  const filtered = getFiltered()
+  const list = document.getElementById('panelList')
+  const idx = filtered.findIndex(t => t.id === selectedId)
+
+  document.getElementById('panelSub').textContent = `${filtered.length} available`
+  document.getElementById('panelCount').textContent = `✓ ${idx+1} of ${filtered.length}`
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <span style="font-size:28px">🔍</span>
+        <p>No templates found</p>
+        <button onclick="clearSearch()">Clear search</button>
+      </div>`
+    return
+  }
+
+  list.innerHTML = filtered.map(t => {
+    const isSel = t.id === selectedId
+    const isDark = t.style === 'Dark'
+    return `
+      <div class="tpl-card ${isSel ? 'selected' : ''}" onclick="selectTemplate('${t.id}')">
+        <div class="tpl-thumb">
+          <div class="tpl-thumb-head" style="background:${t.primary}"></div>
+          <div class="tpl-thumb-body" style="background:${t.bg}">
+            ${[80,60,70].map((w,i) => `
+              <div class="tpl-thumb-line" style="height:3px;width:${w}%;background:${t.text};opacity:${[0.2,0.12,0.16][i]}"></div>
+            `).join('')}
+          </div>
+          <div class="tpl-thumb-dot" style="background:${t.accent}"></div>
+          <div class="tpl-check">
+            <div class="check-circle">✓</div>
+          </div>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">${t.name}</div>
+          <div class="tpl-type">${t.type}</div>
+          <span class="tpl-style ${isDark ? 'dark' : 'light'}">${t.style}</span>
+        </div>
+        <span class="tpl-arrow">›</span>
+      </div>
+    `
+  }).join('')
+
+  // Scroll selected into view
+  if (isSel) {
+    const sel = list.querySelector('.tpl-card.selected')
+    if (sel) sel.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }
+}
+
+function selectTemplate(id) {
+  selectedId = id
+  const t = TEMPLATES.find(t => t.id === id)
+  if (!t) return
+  updatePhonePreview(t)
+  updateBadge(t)
+  renderPanel()
+}
+
+function handleSearch() {
+  searchQuery = document.getElementById('searchInput').value
+  document.getElementById('clearBtn').style.display = searchQuery ? 'block' : 'none'
+  renderPanel()
+}
+
+function clearSearch() {
+  searchQuery = ''
+  document.getElementById('searchInput').value = ''
+  document.getElementById('clearBtn').style.display = 'none'
+  renderPanel()
+}
+
+function handleUseTemplate() {
+  const t = TEMPLATES.find(t => t.id === selectedId)
+  alert(`✅ Template "${t.name}" selected!\n\nNext step: Add your menu items.`)
+}
+
+// Init
+const initial = TEMPLATES[0]
+updatePhonePreview(initial)
+updateBadge(initial)
+renderPanel()
+</script>
+</body>
+</html>

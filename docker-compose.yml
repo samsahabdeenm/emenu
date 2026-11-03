@@ -1,0 +1,63 @@
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: emenu_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: emenu_user
+      POSTGRES_PASSWORD: emenu_pass
+      POSTGRES_DB: emenu_db
+    volumes:
+      - emenu_db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emenu_user -d emenu_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js API Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: emenu_server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://emenu_user:emenu_pass@db:5432/emenu_db
+      PORT: 5000
+      NODE_ENV: production
+      CLIENT_URL: http://localhost
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      SMTP_HOST: ${SMTP_HOST:-smtp.zoho.in}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+    volumes:
+      - emenu_uploads:/app/uploads
+    ports:
+      - "5000:5000"
+
+  # React Frontend (nginx)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: emenu_client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  emenu_db_data:
+  emenu_uploads:
