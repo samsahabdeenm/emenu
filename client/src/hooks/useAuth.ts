@@ -3,7 +3,7 @@ import { useAuthStore } from '@/store/authStore'
 import api from '@/lib/api'
 
 function readCentralLogoutMarker() {
-  const match = document.cookie.match(/(?:^|;\\s*)zv_central_logout=([^;]+)/)
+  const match = document.cookie.match(/(?:^|;\s*)zv_central_logout=([^;]+)/)
   return match ? decodeURIComponent(match[1]) : ''
 }
 function markCentralLogout() {
