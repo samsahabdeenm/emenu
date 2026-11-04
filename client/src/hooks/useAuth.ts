@@ -21,21 +21,26 @@ export function useAuth() {
     let seenMarker = ''
     try { seenMarker = localStorage.getItem('zv_central_logout_seen') || '' } catch {}
     let checking = false
+    const pendingLogoutAtBoot = Boolean(initialMarker && initialMarker !== seenMarker)
+    if (pendingLogoutAtBoot) {
+      try { localStorage.setItem('zv_central_logout_seen', initialMarker) } catch {}
+    }
     const verifySession = async () => {
       if (checking || document.visibilityState === 'hidden') return
       if (window.location.pathname === '/auth/callback') { setLoading(false); return }
-      if (initialMarker && initialMarker !== seenMarker) {
-        try { localStorage.setItem('zv_central_logout_seen', initialMarker) } catch {}
-        try { await api.post('/auth/logout') } catch {}
-        if (active) logout()
-        return
-      }
       checking = true
       try {
         const marker = readCentralLogoutMarker()
-        if (marker && marker !== initialMarker) {
+        let lastSeen = ''
+        try { lastSeen = localStorage.getItem('zv_central_logout_seen') || '' } catch {}
+        if (marker && marker !== lastSeen) {
           try { localStorage.setItem('zv_central_logout_seen', marker) } catch {}
           try { await api.post('/auth/logout') } catch { /* Clear local state even if the network is unavailable. */ }
+          if (active) logout()
+          return
+        }
+        if (pendingLogoutAtBoot) {
+          try { await api.post('/auth/logout') } catch {}
           if (active) logout()
           return
         }
