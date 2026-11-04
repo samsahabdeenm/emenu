@@ -18,6 +18,9 @@ services:
       - key: APP_URL
         sync: false          # https://emenu-app.onrender.com  (your Render URL)
 
+      - key: ZENVENTORA_ACCOUNTS_API_URL
+        value: https://accounts.zenventora.in
+
       - key: MENU_BASE_URL
         sync: false          # https://emenu-app.onrender.com/menu
 
