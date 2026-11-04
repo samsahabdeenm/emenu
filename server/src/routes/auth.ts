@@ -23,6 +23,48 @@ function setAuthCookies(res: Response, accessToken: string, refreshToken: string
   })
 }
 
+
+// ─── POST /api/auth/sso/exchange ───────────────────────────────────────────────
+// Verify a ZenVentora Accounts access token, then issue an eMenu-local session.
+router.post('/sso/exchange', authLimiter, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const accessToken = typeof req.body?.access_token === 'string' ? req.body.access_token : ''
+    if (accessToken.length < 20 || accessToken.length > 8192) {
+      res.status(400).json({ message: 'A valid ZenVentora access token is required' }); return
+    }
+    const accountsBase = (process.env.ZENVENTORA_ACCOUNTS_API_URL || 'https://accounts.zenventora.in').replace(/\\/$/, '')
+    const verification = await fetch(accountsBase + '/api/sso/verify', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: accessToken }), signal: AbortSignal.timeout(10000)
+    })
+    const result = await verification.json() as { user?: { id: string; email: string; full_name?: string; phone_e164?: string; product_access?: string[] }; error?: string }
+    const account = result.user
+    if (!verification.ok || !account?.email || !account.email_verified && !account.id) {
+      res.status(401).json({ message: 'Your ZenVentora session is invalid. Please sign in again.' }); return
+    }
+    if (!Array.isArray(account.product_access) || !account.product_access.includes('emenu')) {
+      res.status(403).json({ message: 'eMenu access is not enabled for this ZenVentora account.' }); return
+    }
+    const email = account.email.toLowerCase()
+    const name = (account.full_name || email.split('@')[0]).trim()
+    let user = await prisma.user.findUnique({ where: { email } })
+    if (!user) {
+      const passwordHash = await bcrypt.hash('zenventora-sso:' + uuidv4(), 12)
+      user = await prisma.user.create({ data: { name, email, phone: account.phone_e164 || null, passwordHash, isVerified: true } })
+    } else {
+      user = await prisma.user.update({ where: { id: user.id }, data: { name: name || user.name, phone: account.phone_e164 || user.phone, isVerified: true } })
+    }
+    const access = signAccessToken({ userId: user.id, email: user.email })
+    const refresh = signRefreshToken({ userId: user.id, email: user.email })
+    await prisma.session.create({ data: { userId: user.id, refreshToken: refresh, expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), ipAddress: req.ip, userAgent: req.headers['user-agent'] } })
+    setAuthCookies(res, access, refresh)
+    res.json({ message: 'ZenVentora account connected', user: { id: user.id, name: user.name, email: user.email, phone: user.phone } })
+  } catch (err) {
+    console.error('ZenVentora SSO exchange failed:', err)
+    res.status(503).json({ message: 'Could not verify your ZenVentora account right now. Please try again.' })
+  }
+})
+
 // ─── POST /api/auth/signup ────────────────────────────────────────────────────
 router.post('/signup', authLimiter, async (req: Request, res: Response): Promise<void> => {
   try {
