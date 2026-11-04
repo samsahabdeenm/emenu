@@ -1336,7 +1336,7 @@ async function loadMenuData() {
 }
 
 function readCentralLogoutMarker(){
-  var match = document.cookie.match(/(?:^|;\\s*)zv_central_logout=([^;]+)/);
+  var match = document.cookie.match(/(?:^|;\s*)zv_central_logout=([^;]+)/);
   return match ? decodeURIComponent(match[1]) : '';
 }
 function markCentralLogout(){
