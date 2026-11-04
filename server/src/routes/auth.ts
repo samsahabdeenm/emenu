@@ -32,14 +32,14 @@ router.post('/sso/exchange', authLimiter, async (req: Request, res: Response): P
     if (accessToken.length < 20 || accessToken.length > 8192) {
       res.status(400).json({ message: 'A valid ZenVentora access token is required' }); return
     }
-    const accountsBase = (process.env.ZENVENTORA_ACCOUNTS_API_URL || 'https://accounts.zenventora.in').replace(/\\/$/, '')
+    const accountsBase = (process.env.ZENVENTORA_ACCOUNTS_API_URL || 'https://accounts.zenventora.in').replace(/\/$/, '')
     const verification = await fetch(accountsBase + '/api/sso/verify', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ access_token: accessToken }), signal: AbortSignal.timeout(10000)
     })
-    const result = await verification.json() as { user?: { id: string; email: string; full_name?: string; phone_e164?: string; product_access?: string[] }; error?: string }
+    const result = await verification.json() as { user?: { id: string; email: string; full_name?: string; phone_e164?: string; product_access?: string[]; email_verified?: boolean }; error?: string }
     const account = result.user
-    if (!verification.ok || !account?.email || !account.email_verified && !account.id) {
+    if (!verification.ok || !account?.email || account.email_verified !== true) {
       res.status(401).json({ message: 'Your ZenVentora session is invalid. Please sign in again.' }); return
     }
     if (!Array.isArray(account.product_access) || !account.product_access.includes('emenu')) {
