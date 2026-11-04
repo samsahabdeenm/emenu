@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-const accountsUrl = (import.meta.env.VITE_ZENVENTORA_ACCOUNTS_URL || 'https://accounts.zenventora.in').replace(/\\/$/, '')
+const accountsUrl = (import.meta.env.VITE_ZENVENTORA_ACCOUNTS_URL || 'https://accounts.zenventora.in').replace(/\/$/, '')
 function goToAccounts(mode: 'signin'|'signup') {
   const url = new URL(accountsUrl + '/')
   url.searchParams.set('product', 'emenu')
