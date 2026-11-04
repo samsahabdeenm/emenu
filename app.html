@@ -1353,9 +1353,10 @@ window.setInterval(function(){
   centralLogoutTriggered = true;
   try { localStorage.setItem('zv_central_logout_seen', marker); } catch(e) {}
   var hadSession = Boolean(S.user);
+  var publicMenuOpen = window.location.pathname.split('/')[1] === 'menu' || Boolean(new URLSearchParams(window.location.search).get('m'));
   api('POST','/auth/logout').catch(function(){});
   resetState();
-  show('s-login');
+  if (!publicMenuOpen) show('s-login');
   if (hadSession) toast('You were signed out of ZenVentora Accounts.','info');
 }, 2000);
 
@@ -1575,6 +1576,13 @@ async function init(){
       return;
     }
   }
+  // Public menu: /menu/:slug route or ?m=slug param
+  var pathParts=window.location.pathname.split('/');
+  var mSlug=(pathParts[1]==='menu'&&pathParts[2])?pathParts[2]:new URLSearchParams(window.location.search).get('m');
+  if(mSlug){
+    try { var _ld=new Date(),_td=_ld.getFullYear()+'-'+String(_ld.getMonth()+1).padStart(2,'0')+'-'+String(_ld.getDate()).padStart(2,'0'); var pubData=await api('GET','/public/menu/'+mSlug+'?localDate='+_td); S._qrMenuData=pubData; show('s-menu'); return; }
+    catch(e){ showBootError('Unable to load this menu. Check your connection and try again.'); return; }
+  }
   // If a connected product signed out after this browser last used eMenu,
   // discard the old local session before restoring it.
   var logoutMarker = readCentralLogoutMarker();
@@ -1586,13 +1594,6 @@ async function init(){
     show('s-login');
     S.initialized = true;
     return;
-  }
-  // Public menu: /menu/:slug route or ?m=slug param
-  var pathParts=window.location.pathname.split('/');
-  var mSlug=(pathParts[1]==='menu'&&pathParts[2])?pathParts[2]:new URLSearchParams(window.location.search).get('m');
-  if(mSlug){
-    try { var _ld=new Date(),_td=_ld.getFullYear()+'-'+String(_ld.getMonth()+1).padStart(2,'0')+'-'+String(_ld.getDate()).padStart(2,'0'); var pubData=await api('GET','/public/menu/'+mSlug+'?localDate='+_td); S._qrMenuData=pubData; show('s-menu'); return; }
-    catch(e){ showBootError('Unable to load this menu. Check your connection and try again.'); return; }
   }
   S._qrMenuData=null;
   // Check auth
