@@ -18,13 +18,17 @@ export function useAuth() {
   useEffect(() => {
     let active = true
     const initialMarker = readCentralLogoutMarker()
+    const callbackParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    const isAccountsCallback = callbackParams.has('account_access_token')
     let seenMarker = ''
     try { seenMarker = localStorage.getItem('zv_central_logout_seen') || '' } catch {}
-    let checking = false
-    const pendingLogoutAtBoot = Boolean(initialMarker && initialMarker !== seenMarker)
-    if (pendingLogoutAtBoot) {
+    const pendingLogoutAtBoot = Boolean(initialMarker && initialMarker !== seenMarker && !isAccountsCallback)
+    if (isAccountsCallback) {
+      try { localStorage.setItem('zv_central_logout_seen', initialMarker) } catch {}
+    } else if (pendingLogoutAtBoot) {
       try { localStorage.setItem('zv_central_logout_seen', initialMarker) } catch {}
     }
+    let checking = false
     const verifySession = async () => {
       if (checking || document.visibilityState === 'hidden') return
       if (window.location.pathname === '/auth/callback') { setLoading(false); return }
@@ -51,7 +55,11 @@ export function useAuth() {
       } finally { checking = false }
     }
     setLoading(true)
-    void verifySession()
+    if (!pendingLogoutAtBoot && !isAccountsCallback) void verifySession()
+    else if (pendingLogoutAtBoot) {
+      void api.post('/auth/logout').finally(() => { if (active) logout() })
+      setLoading(false)
+    } else setLoading(false)
     const handleLogout = () => logout()
     const onVisible = () => { if (document.visibilityState === 'visible') void verifySession() }
     window.addEventListener('auth:logout', handleLogout)
