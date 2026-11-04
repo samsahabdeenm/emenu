@@ -26,6 +26,7 @@ function ZenVentoraAuthCallback() {
         const response = await api.post('/auth/sso/exchange', { access_token: accessToken })
         if (!active) return
         useAuthStore.getState().setUser(response.data.user)
+        try { localStorage.setItem('zv_central_logout_seen', document.cookie.match(/(?:^|;\\s*)zv_central_logout=([^;]+)/)?.[1] || '') } catch {}
         navigate('/dashboard', { replace: true })
       } catch (err: any) {
         if (active) setError(err.response?.data?.message || 'Could not connect your ZenVentora account. Please try again.')
