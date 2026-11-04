@@ -26,7 +26,7 @@ jobs:
           node-version: 22
       - name: Syntax-check deployed standalone app shell
         run: |
-          node -e 'const fs=require("fs"); const html=fs.readFileSync("app.html","utf8"); const scripts=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)].map(x=>x[1]).filter(Boolean); if(!scripts.length) throw new Error("No inline app scripts found"); fs.writeFileSync("/tmp/emenu-app-inline.js",scripts.join("\\n"));'
+          node -e 'const fs=require("fs"); const html=fs.readFileSync("app.html","utf8"); const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x=>x[1]).filter(Boolean); if(!scripts.length) throw new Error("No inline app scripts found"); fs.writeFileSync("/tmp/emenu-app-inline.js",scripts.join("\n"));'
           node --check /tmp/emenu-app-inline.js
   server-build:
     runs-on: ubuntu-latest
