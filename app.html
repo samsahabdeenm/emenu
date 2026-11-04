@@ -1549,7 +1549,7 @@ async function init(){
   var authFragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   var accountAccessToken = authFragment.get('account_access_token');
   if (accountAccessToken || window.location.pathname === '/auth/callback') {
-    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    window.history.replaceState({}, document.title, '/');
     if (!accountAccessToken) { show('s-login'); toast('The ZenVentora sign-in response is missing. Please try again.','error'); return; }
     try {
       var ssoResult = await api('POST','/auth/sso/exchange',{access_token:accountAccessToken});
@@ -3741,6 +3741,7 @@ async function doLogout(){
   try{await api('POST','/auth/logout');}catch(e){}
   resetState();
   var marker = markCentralLogout();
+  centralLogoutMarkerAtBoot = marker;
   try { localStorage.setItem('zv_central_logout_seen', marker); } catch(e) {}
   toast('Logged out','info'); show('s-login');
 }
