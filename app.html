@@ -1345,16 +1345,18 @@ function markCentralLogout(){
   return marker;
 }
 var centralLogoutMarkerAtBoot = readCentralLogoutMarker();
+var centralLogoutTriggered = false;
 window.setInterval(function(){
   var marker = readCentralLogoutMarker();
   if (!marker || marker === centralLogoutMarkerAtBoot) return;
   centralLogoutMarkerAtBoot = marker;
+  centralLogoutTriggered = true;
   try { localStorage.setItem('zv_central_logout_seen', marker); } catch(e) {}
-  if (!S.user) return;
+  var hadSession = Boolean(S.user);
   api('POST','/auth/logout').catch(function(){});
   resetState();
   show('s-login');
-  toast('You were signed out of ZenVentora Accounts.','info');
+  if (hadSession) toast('You were signed out of ZenVentora Accounts.','info');
 }, 2000);
 
 // ─────────────────────────────────────────
@@ -1554,7 +1556,9 @@ async function init(){
     try {
       var ssoResult = await api('POST','/auth/sso/exchange',{access_token:accountAccessToken});
       S.user = ssoResult.user;
-      try { localStorage.setItem('zv_central_logout_seen', readCentralLogoutMarker()); } catch(e) {}
+      centralLogoutTriggered = false;
+      centralLogoutMarkerAtBoot = readCentralLogoutMarker();
+      try { localStorage.setItem('zv_central_logout_seen', centralLogoutMarkerAtBoot); } catch(e) {}
       var ssoBizResult = await api('GET','/business/me');
       var ssoBiz = ssoBizResult.business;
       var ssoMenu = ssoBiz && ssoBiz.menus && ssoBiz.menus[0] ? ssoBiz.menus[0] : null;
@@ -1598,6 +1602,7 @@ async function init(){
     var biz=bizRes.business;
     var menu=biz&&biz.menus&&biz.menus[0]?biz.menus[0]:null;
     syncFromAPI(biz,menu);
+    if (centralLogoutTriggered) { resetState(); show('s-login'); return; }
     var _p=new URLSearchParams(window.location.search);
     if(_p.get('google')==='ok') { setTimeout(function(){toast('Welcome, '+S.user.name.split(' ')[0]+'! 👋');},300); window.history.replaceState({},'','/'); }
     show(biz&&biz.name?'s-dashboard':'s-onboard');
