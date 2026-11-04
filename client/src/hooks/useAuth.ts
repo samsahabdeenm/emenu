@@ -7,7 +7,9 @@ function readCentralLogoutMarker() {
   return match ? decodeURIComponent(match[1]) : ''
 }
 function markCentralLogout() {
-  document.cookie = 'zv_central_logout=' + Date.now() + '; Domain=.zenventora.in; Path=/; Max-Age=31536000; SameSite=Lax; Secure'
+  const marker = String(Date.now())
+  document.cookie = 'zv_central_logout=' + marker + '; Domain=.zenventora.in; Path=/; Max-Age=31536000; SameSite=Lax; Secure'
+  try { localStorage.setItem('zv_central_logout_seen', marker) } catch {}
 }
 
 export function useAuth() {
@@ -16,14 +18,23 @@ export function useAuth() {
   useEffect(() => {
     let active = true
     const initialMarker = readCentralLogoutMarker()
+    let seenMarker = ''
+    try { seenMarker = localStorage.getItem('zv_central_logout_seen') || '' } catch {}
     let checking = false
     const verifySession = async () => {
       if (checking || document.visibilityState === 'hidden') return
       if (window.location.pathname === '/auth/callback') { setLoading(false); return }
+      if (initialMarker && initialMarker !== seenMarker) {
+        try { localStorage.setItem('zv_central_logout_seen', initialMarker) } catch {}
+        try { await api.post('/auth/logout') } catch {}
+        if (active) logout()
+        return
+      }
       checking = true
       try {
         const marker = readCentralLogoutMarker()
         if (marker && marker !== initialMarker) {
+          try { localStorage.setItem('zv_central_logout_seen', marker) } catch {}
           try { await api.post('/auth/logout') } catch { /* Clear local state even if the network is unavailable. */ }
           if (active) logout()
           return
