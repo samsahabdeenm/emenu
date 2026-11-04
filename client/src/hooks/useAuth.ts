@@ -19,6 +19,7 @@ export function useAuth() {
     let checking = false
     const verifySession = async () => {
       if (checking || document.visibilityState === 'hidden') return
+      if (window.location.pathname === '/auth/callback') { setLoading(false); return }
       checking = true
       try {
         const marker = readCentralLogoutMarker()
