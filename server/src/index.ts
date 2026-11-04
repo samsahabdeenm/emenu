@@ -72,6 +72,12 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', env: process.env.NODE_ENV, timestamp: new Date().toISOString() })
 })
 
+// Serve the SPA callback used by ZenVentora Accounts SSO.
+app.get('/auth/callback', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store')
+  res.sendFile(path.join(staticRoot, 'app.html'))
+})
+
 // ─── Customer menu page (QR scan) ────────────────────────────────────────────
 // /menu/:slug serves app.html — client-side renders the public menu
 app.get('/menu/:slug', (_req, res) => {
