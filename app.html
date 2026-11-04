@@ -536,18 +536,10 @@ body{font-family:'Inter',sans-serif;color:#111;background:#f8fafc;-webkit-font-s
     </div>
     <div class="auth-right">
       <div class="auth-form-box">
-        <h1>Sign in</h1>
-        <p class="auth-sub">No account? <a class="alink" onclick="show('s-signup')">Sign up free →</a></p>
-        <div class="ig"><label>Email address</label><input type="email" id="li-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-        <div class="ig">
-          <label>Password</label>
-          <div class="pw-wrap"><input type="password" id="li-pass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"/><button class="pw-eye" onclick="togglePwd('li-pass',this)">👁️</button></div>
-        </div>
-        <div style="text-align:right;margin-top:-8px;margin-bottom:20px"><a class="alink" style="font-size:.82rem" onclick="show('s-forgot')">Forgot password?</a></div>
-        <button class="btn btn-primary btn-full btn-lg" onclick="doLogin()">Sign In →</button>
-        <div class="g-divider">or</div>
-        <div id="g-btn-login" style="display:flex;justify-content:center;min-height:44px"></div>
-        <p style="text-align:center;margin-top:16px;font-size:.82rem;color:#9ca3af">New here? <a class="alink" onclick="show('s-signup')">Create a free account</a></p>
+<h1>Welcome to eMenu</h1>
+        <p class="auth-sub">Continue securely with your ZenVentora account. One identity for all your connected products.</p>
+        <button class="btn btn-primary btn-full btn-lg" onclick="startZenVentoraAuth('signin')">Continue with ZenVentora →</button>
+        <p style="text-align:center;margin-top:20px;font-size:.84rem;color:#9ca3af">New to eMenu? <a class="alink" onclick="startZenVentoraAuth('signup')">Create your account</a></p>
       </div>
     </div>
   </div>
@@ -575,26 +567,10 @@ body{font-family:'Inter',sans-serif;color:#111;background:#f8fafc;-webkit-font-s
     </div>
     <div class="auth-right">
       <div class="auth-form-box">
-        <h1>Create account</h1>
-        <p class="auth-sub">Already have one? <a class="alink" onclick="show('s-login')">Sign in</a></p>
-        <div class="row2">
-          <div class="ig"><label>Full Name *</label><input type="text" id="su-name" placeholder="Mohan Kumar"/></div>
-          <div class="ig"><label>Phone *</label><input type="tel" id="su-phone" placeholder="+91 98765 43210"/></div>
-        </div>
-        <div class="ig"><label>Email address *</label><input type="email" id="su-email" placeholder="you@example.com"/></div>
-        <div class="ig">
-          <label>Password *</label>
-          <div class="pw-wrap"><input type="password" id="su-pass" placeholder="Min. 8 characters" oninput="checkStrength(this.value)"/><button class="pw-eye" onclick="togglePwd('su-pass',this)">👁️</button></div>
-          <div class="ps-bars"><div class="ps-bar" id="pb1"></div><div class="ps-bar" id="pb2"></div><div class="ps-bar" id="pb3"></div><div class="ps-bar" id="pb4"></div></div>
-        </div>
-        <div class="ig">
-          <label>Confirm Password *</label>
-          <div class="pw-wrap"><input type="password" id="su-pass2" placeholder="Repeat password"/><button class="pw-eye" onclick="togglePwd('su-pass2',this)">👁️</button></div>
-        </div>
-        <button class="btn btn-primary btn-full btn-lg" onclick="doSignup()" style="margin-top:6px">Create Free Account →</button>
-        <div class="g-divider">or</div>
-        <div id="g-btn-signup" style="display:flex;justify-content:center;min-height:44px"></div>
-        <p style="text-align:center;margin-top:12px;font-size:.76rem;color:#9ca3af;line-height:1.6">By signing up you agree to our Terms of Service and Privacy Policy.</p>
+<h1>Create your eMenu account</h1>
+        <p class="auth-sub">Your ZenVentora account securely manages your eMenu access and profile.</p>
+        <button class="btn btn-primary btn-full btn-lg" onclick="startZenVentoraAuth('signup')">Continue to create account →</button>
+        <p style="text-align:center;margin-top:20px;font-size:.84rem;color:#9ca3af">Already have an account? <a class="alink" onclick="startZenVentoraAuth('signin')">Sign in</a></p>
       </div>
     </div>
   </div>
@@ -1300,51 +1276,16 @@ body{font-family:'Inter',sans-serif;color:#111;background:#f8fafc;-webkit-font-s
 
 <script>
 // ─────────────────────────────────────────
-// GOOGLE SIGN-IN CONFIG
-// ─────────────────────────────────────────
-// Paste your Google Client ID here (see setup steps below)
-var GOOGLE_CLIENT_ID = '147155455700-8tb2ova0g6i9cfrjlsvgjcqheqr2vbse.apps.googleusercontent.com';
-
-function initGoogleSignIn(){
-  if(!GOOGLE_CLIENT_ID||!window.google) return;
-  try{
-    // Redirect mode: no popup — Google navigates the page, then POSTs credential
-    // to our server /api/auth/google/redirect. Server sets cookies and redirects back.
-    // This avoids all cross-origin iframe popup issues in Chrome.
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      ux_mode: 'redirect',
-      login_uri: window.location.origin + '/api/auth/google/redirect',
-      auto_select: false
-    });
-    var opts={type:'standard',theme:'outline',size:'large',width:320};
-    var btnL=document.getElementById('g-btn-login');
-    var btnS=document.getElementById('g-btn-signup');
-    if(btnL) google.accounts.id.renderButton(btnL, Object.assign({},opts,{text:'continue_with'}));
-    if(btnS) google.accounts.id.renderButton(btnS, Object.assign({},opts,{text:'signup_with'}));
-  }catch(e){ console.warn('Google Sign-In init failed:',e); }
+// ZenVentora central account entry points
+const ZENVENTORA_ACCOUNTS_URL = (window.ZENVENTORA_ACCOUNTS_URL || 'https://accounts.zenventora.in').replace(/\/$/, '');
+function startZenVentoraAuth(mode) {
+  var url = new URL(ZENVENTORA_ACCOUNTS_URL + '/');
+  url.searchParams.set('product', 'emenu');
+  url.searchParams.set('mode', mode === 'signup' ? 'signup' : 'signin');
+  url.searchParams.set('redirect_to', window.location.origin + '/auth/callback');
+  window.location.assign(url.toString());
 }
 
-function handleGoogleCredential(response){
-  // Remove overlay if open
-  var overlay=document.getElementById('g-overlay'); if(overlay) overlay.remove();
-  // Send the raw credential to backend — server verifies signature, never trust client decode
-  doGoogleAuth(response.credential);
-}
-
-async function doGoogleAuth(credential){
-  try {
-    var r=await api('POST','/auth/google',{credential});
-    S.user=r.user;
-    var bizRes=await api('GET','/business/me');
-    var biz=bizRes.business, menu=biz&&biz.menus&&biz.menus[0]?biz.menus[0]:null;
-    syncFromAPI(biz,menu);
-    toast('Welcome, '+S.user.name.split(' ')[0]+'! 👋');
-    show(biz&&biz.name?'s-dashboard':'s-onboard');
-  } catch(e){ toast('Google sign-in failed: '+(e.message||'Try again'),'error'); }
-}
-
-// ─────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────
 // ─────────────────────────────────────────
@@ -1356,7 +1297,7 @@ async function api(method, path, body, _retry) {
   var res = await fetch('/api' + path, opts);
   // Auth endpoints return 401 for wrong credentials — never for expired tokens.
   // Skip the refresh logic for these paths so the real error message reaches the caller.
-  var skipRefreshPaths = ['/auth/login','/auth/signup','/auth/forgot-password','/auth/reset-password','/auth/google'];
+  var skipRefreshPaths = ['/auth/login','/auth/signup','/auth/forgot-password','/auth/reset-password','/auth/google','/auth/sso/exchange'];
   var isAuthPath = skipRefreshPaths.some(function(p){ return path.startsWith(p); });
   var isPublicPath = path.startsWith('/public/');
   // Auto-refresh token on 401, then retry once (protected routes only)
@@ -1393,6 +1334,28 @@ async function api(method, path, body, _retry) {
 async function loadMenuData() {
   var r = await api('GET','/menu/me'); return r.menu || null;
 }
+
+function readCentralLogoutMarker(){
+  var match = document.cookie.match(/(?:^|;\\s*)zv_central_logout=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+function markCentralLogout(){
+  var marker = String(Date.now());
+  document.cookie = 'zv_central_logout=' + marker + '; Domain=.zenventora.in; Path=/; Max-Age=31536000; SameSite=Lax; Secure';
+  return marker;
+}
+var centralLogoutMarkerAtBoot = readCentralLogoutMarker();
+window.setInterval(function(){
+  var marker = readCentralLogoutMarker();
+  if (!marker || marker === centralLogoutMarkerAtBoot) return;
+  centralLogoutMarkerAtBoot = marker;
+  try { localStorage.setItem('zv_central_logout_seen', marker); } catch(e) {}
+  if (!S.user) return;
+  api('POST','/auth/logout').catch(function(){});
+  resetState();
+  show('s-login');
+  toast('You were signed out of ZenVentora Accounts.','info');
+}, 2000);
 
 // ─────────────────────────────────────────
 // STATE  (no localStorage — data lives in PostgreSQL)
@@ -1581,6 +1544,45 @@ function showBootError(message){
 }
 
 async function init(){
+  // Accounts returns a short-lived access token in the URL fragment. Exchange it
+  // once for an eMenu-local HTTP-only session, then remove the fragment.
+  var authFragment = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  var accountAccessToken = authFragment.get('account_access_token');
+  if (accountAccessToken || window.location.pathname === '/auth/callback') {
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    if (!accountAccessToken) { show('s-login'); toast('The ZenVentora sign-in response is missing. Please try again.','error'); return; }
+    try {
+      var ssoResult = await api('POST','/auth/sso/exchange',{access_token:accountAccessToken});
+      S.user = ssoResult.user;
+      try { localStorage.setItem('zv_central_logout_seen', readCentralLogoutMarker()); } catch(e) {}
+      var ssoBizResult = await api('GET','/business/me');
+      var ssoBiz = ssoBizResult.business;
+      var ssoMenu = ssoBiz && ssoBiz.menus && ssoBiz.menus[0] ? ssoBiz.menus[0] : null;
+      syncFromAPI(ssoBiz,ssoMenu);
+      toast('Welcome, '+S.user.name.split(' ')[0]+'! 👋');
+      show(ssoBiz && ssoBiz.name ? 's-dashboard' : 's-onboard');
+      S.initialized = true;
+      return;
+    } catch(ssoError) {
+      resetState();
+      show('s-login');
+      toast(ssoError.message || 'Could not connect your ZenVentora account. Please sign in again.','error');
+      S.initialized = true;
+      return;
+    }
+  }
+  // If a connected product signed out after this browser last used eMenu,
+  // discard the old local session before restoring it.
+  var logoutMarker = readCentralLogoutMarker();
+  var seenLogoutMarker = '';
+  try { seenLogoutMarker = localStorage.getItem('zv_central_logout_seen') || ''; } catch(e) {}
+  if (logoutMarker && logoutMarker !== seenLogoutMarker) {
+    try { await api('POST','/auth/logout'); } catch(e) {}
+    try { localStorage.setItem('zv_central_logout_seen', logoutMarker); } catch(e) {}
+    show('s-login');
+    S.initialized = true;
+    return;
+  }
   // Public menu: /menu/:slug route or ?m=slug param
   var pathParts=window.location.pathname.split('/');
   var mSlug=(pathParts[1]==='menu'&&pathParts[2])?pathParts[2]:new URLSearchParams(window.location.search).get('m');
@@ -1657,55 +1659,15 @@ function checkStrength(pw){
 // ─────────────────────────────────────────
 // LOGIN
 // ─────────────────────────────────────────
-async function doLogin(){
-  var email=document.getElementById('li-email').value.trim().toLowerCase();
-  var pass=document.getElementById('li-pass').value;
-  if(!email||!pass){toast('Please fill in all fields','error');return;}
-  var btn=document.querySelector('#s-login .btn-primary');
-  if(btn){btn.disabled=true;btn.textContent='Signing in…';}
-  try {
-    resetState();
-    var r=await api('POST','/auth/login',{email,password:pass});
-    S.user=r.user;
-    var bizRes=await api('GET','/business/me');
-    var biz=bizRes.business, menu=biz&&biz.menus&&biz.menus[0]?biz.menus[0]:null;
-    syncFromAPI(biz,menu);
-    toast('Welcome back, '+r.user.name.split(' ')[0]+'! 👋');
-    show(biz&&biz.name?'s-dashboard':'s-onboard');
-  } catch(e){toast(e.message||'Login failed','error');}
-  finally{if(btn){btn.disabled=false;btn.textContent='Sign In →';}}
+function doLogin(){
+  startZenVentoraAuth('signin');
 }
 
 // ─────────────────────────────────────────
 // SIGNUP
 // ─────────────────────────────────────────
-async function doSignup(){
-  var name=document.getElementById('su-name').value.trim();
-  var phone=document.getElementById('su-phone').value.trim();
-  var email=document.getElementById('su-email').value.trim().toLowerCase();
-  var pass=document.getElementById('su-pass').value;
-  var pass2=document.getElementById('su-pass2').value;
-  if(!name||!phone||!email||!pass){toast('Please fill in all required fields','error');return;}
-  if(pass.length<8){toast('Password must be at least 8 characters','error');return;}
-  if(pass!==pass2){toast('Passwords do not match','error');return;}
-  var btn=document.querySelector('#s-signup .btn-primary');
-  if(btn){btn.disabled=true;btn.textContent='Creating account…';}
-  try {
-    resetState();
-    var r=await api('POST','/auth/signup',{name,phone,email,password:pass});
-    S.user=r.user; syncFromAPI(null,null);
-    toast('Account created! Let\'s set up your menu 🎉');
-    show('s-onboard');
-  } catch(e){
-    if(e.status===409){
-      // Account already exists — nudge the user to login instead
-      toast('An account with this email already exists. Please sign in.','error');
-      setTimeout(function(){ show('s-login'); }, 1800);
-    } else {
-      toast(e.message||'Signup failed','error');
-    }
-  }
-  finally{if(btn){btn.disabled=false;btn.textContent='Create Account →';}}
+function doSignup(){
+  startZenVentoraAuth('signup');
 }
 
 // ─────────────────────────────────────────
@@ -3778,6 +3740,8 @@ async function doLogout(){
   if(!confirm('Log out of E-Menu?')) return;
   try{await api('POST','/auth/logout');}catch(e){}
   resetState();
+  var marker = markCentralLogout();
+  try { localStorage.setItem('zv_central_logout_seen', marker); } catch(e) {}
   toast('Logged out','info'); show('s-login');
 }
 
@@ -3787,6 +3751,6 @@ async function doLogout(){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init, {once:true});
 else init();
 </script>
-<script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"></script>
+
 </body>
 </html>
