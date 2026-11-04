@@ -22,7 +22,7 @@ export function useAuth() {
     const isAccountsCallback = callbackParams.has('account_access_token')
     let seenMarker = ''
     try { seenMarker = localStorage.getItem('zv_central_logout_seen') || '' } catch {}
-    const pendingLogoutAtBoot = Boolean(initialMarker && initialMarker !== seenMarker && !isAccountsCallback)
+    let pendingLogoutAtBoot = Boolean(initialMarker && initialMarker !== seenMarker && !isAccountsCallback)
     if (isAccountsCallback) {
       try { localStorage.setItem('zv_central_logout_seen', initialMarker) } catch {}
     } else if (pendingLogoutAtBoot) {
@@ -43,11 +43,6 @@ export function useAuth() {
           if (active) logout()
           return
         }
-        if (pendingLogoutAtBoot) {
-          try { await api.post('/auth/logout') } catch {}
-          if (active) logout()
-          return
-        }
         const res = await api.get('/auth/me')
         if (active) setUser(res.data.user)
       } catch {
@@ -57,6 +52,7 @@ export function useAuth() {
     setLoading(true)
     if (!pendingLogoutAtBoot && !isAccountsCallback) void verifySession()
     else if (pendingLogoutAtBoot) {
+      pendingLogoutAtBoot = false
       void api.post('/auth/logout').finally(() => { if (active) logout() })
       setLoading(false)
     } else setLoading(false)
